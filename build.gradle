@@ -19,18 +19,22 @@ repositories {
         name = 'Fabric'
         url = 'https://maven.fabricmc.net/'
     }
+	maven {
+		name "Quilt Repository"
+		url "https://maven.quiltmc.org/repository/release"
+	}
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.ow2.asm:asm:9.5'
-    implementation 'org.ow2.asm:asm-commons:9.5'
-    implementation 'org.ow2.asm:asm-tree:9.5'
-    implementation 'org.ow2.asm:asm-util:9.5'
+    implementation 'org.ow2.asm:asm:9.6'
+    implementation 'org.ow2.asm:asm-commons:9.6'
+    implementation 'org.ow2.asm:asm-tree:9.6'
+    implementation 'org.ow2.asm:asm-util:9.6'
 
     implementation 'net.fabricmc:mapping-io:0.5.1'
 
-    compileOnly 'cuchaz:enigma:2.3.1'
+    compileOnly 'org.quiltmc:enigma:2.2.1'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
 }

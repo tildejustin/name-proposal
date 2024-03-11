@@ -16,22 +16,23 @@
 
 package net.fabricmc.nameproposal.enigma;
 
-import cuchaz.enigma.api.service.EnigmaServiceContext;
-import cuchaz.enigma.api.service.ObfuscationTestService;
-import cuchaz.enigma.translation.representation.entry.ClassEntry;
-import cuchaz.enigma.translation.representation.entry.Entry;
-import cuchaz.enigma.translation.representation.entry.FieldEntry;
-import cuchaz.enigma.translation.representation.entry.MethodEntry;
+import org.quiltmc.enigma.api.service.EnigmaServiceContext;
+import org.quiltmc.enigma.api.service.ObfuscationTestService;
+import org.quiltmc.enigma.api.translation.representation.entry.ClassEntry;
+import org.quiltmc.enigma.api.translation.representation.entry.Entry;
+import org.quiltmc.enigma.api.translation.representation.entry.FieldEntry;
+import org.quiltmc.enigma.api.translation.representation.entry.MethodEntry;
+import org.quiltmc.enigma.util.Either;
 
 public class IntermediaryObfuscationTestService implements ObfuscationTestService {
 	private final String prefix, classPrefix, classPackagePrefix, fieldPrefix, methodPrefix, componentPrefix;
 
-	public IntermediaryObfuscationTestService(EnigmaServiceContext<cuchaz.enigma.api.service.ObfuscationTestService> context) {
-		this.prefix = context.getArgument("package").orElse("net/minecraft") + "/";
-		this.classPrefix = context.getArgument("classPrefix").orElse("class_");
-		this.fieldPrefix = context.getArgument("fieldPrefix").orElse("field_");
-		this.methodPrefix = context.getArgument("methodPrefix").orElse("method_");
-		this.componentPrefix = context.getArgument("componentPrefix").orElse("comp_");
+	public IntermediaryObfuscationTestService(EnigmaServiceContext<ObfuscationTestService> context) {
+		this.prefix = context.getArgument("package").orElse(Either.left("net/minecraft")) + "/";
+		this.classPrefix = context.getArgument("classPrefix").orElse(Either.left("class_")) + "";
+		this.fieldPrefix = context.getArgument("fieldPrefix").orElse(Either.left("field_")) + "";
+		this.methodPrefix = context.getArgument("methodPrefix").orElse(Either.left("method_")) + "";
+		this.componentPrefix = context.getArgument("componentPrefix").orElse(Either.left("comp_")) + "";
 
 		this.classPackagePrefix = this.prefix + this.classPrefix;
 	}
@@ -71,5 +72,10 @@ public class IntermediaryObfuscationTestService implements ObfuscationTestServic
 
 		// known type, not obfuscated
 		return true;
+	}
+
+	@Override
+	public String getId() {
+		return NameProposalServiceEnigmaPlugin.ID_PREFIX + "intermediary_obfuscation_test";
 	}
 }

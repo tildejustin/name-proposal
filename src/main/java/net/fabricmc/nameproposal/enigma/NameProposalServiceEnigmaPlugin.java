@@ -16,21 +16,22 @@
 
 package net.fabricmc.nameproposal.enigma;
 
-import cuchaz.enigma.api.EnigmaPlugin;
-import cuchaz.enigma.api.EnigmaPluginContext;
-import cuchaz.enigma.api.service.JarIndexerService;
-import cuchaz.enigma.api.service.NameProposalService;
-import cuchaz.enigma.api.service.ObfuscationTestService;
+import org.quiltmc.enigma.api.EnigmaPlugin;
+import org.quiltmc.enigma.api.EnigmaPluginContext;
+import org.quiltmc.enigma.api.service.JarIndexerService;
+import org.quiltmc.enigma.api.service.NameProposalService;
+import org.quiltmc.enigma.api.service.ObfuscationTestService;
+
 
 public class NameProposalServiceEnigmaPlugin implements EnigmaPlugin {
-	private static final String ID_PREFIX = "nameproposal:";
+	public static final String ID_PREFIX = "nameproposal:";
 
 	@Override
 	public void init(EnigmaPluginContext ctx) {
-		ctx.registerService(ID_PREFIX + "intermediary_obfuscation_test", ObfuscationTestService.TYPE, IntermediaryObfuscationTestService::new);
+		ctx.registerService(ObfuscationTestService.TYPE, IntermediaryObfuscationTestService::new);
 
 		EnigmaNameProposalService service = new EnigmaNameProposalService();
-		ctx.registerService(ID_PREFIX + "jar_indexer", JarIndexerService.TYPE, ctx1 -> service);
-		ctx.registerService(ID_PREFIX + "name_proposal", NameProposalService.TYPE, ctx1 -> service);
+		ctx.registerService(JarIndexerService.TYPE, ctx1 -> service);
+		ctx.registerService(NameProposalService.TYPE, ctx1 -> service);
 	}
 }

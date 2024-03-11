@@ -16,20 +16,24 @@
 
 package net.fabricmc.nameproposal.enigma;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import cuchaz.enigma.analysis.index.JarIndex;
-import cuchaz.enigma.api.service.JarIndexerService;
-import cuchaz.enigma.api.service.NameProposalService;
-import cuchaz.enigma.classprovider.ClassProvider;
-import cuchaz.enigma.translation.mapping.EntryRemapper;
-import cuchaz.enigma.translation.representation.entry.Entry;
-import cuchaz.enigma.translation.representation.entry.FieldEntry;
-import cuchaz.enigma.translation.representation.entry.MethodEntry;
 import org.objectweb.asm.tree.ClassNode;
+import org.quiltmc.enigma.api.analysis.index.jar.EntryIndex;
+import org.quiltmc.enigma.api.analysis.index.jar.JarIndex;
+import org.quiltmc.enigma.api.class_provider.ClassProvider;
+import org.quiltmc.enigma.api.service.JarIndexerService;
+import org.quiltmc.enigma.api.service.NameProposalService;
+import org.quiltmc.enigma.api.source.TokenType;
+import org.quiltmc.enigma.api.translation.mapping.EntryMapping;
+import org.quiltmc.enigma.api.translation.mapping.EntryRemapper;
+import org.quiltmc.enigma.api.translation.representation.entry.Entry;
+import org.quiltmc.enigma.api.translation.representation.entry.FieldEntry;
+import org.quiltmc.enigma.api.translation.representation.entry.MethodEntry;
 
 import net.fabricmc.nameproposal.MappingEntry;
 import net.fabricmc.nameproposal.NameFinder;
@@ -52,21 +56,34 @@ public class EnigmaNameProposalService implements JarIndexerService, NameProposa
 	}
 
 	@Override
-	public Optional<String> proposeName(Entry<?> obfEntry, EntryRemapper remapper) {
+	public Map<Entry<?>, EntryMapping> getProposedNames(JarIndex jarIndex) {
+		Map<Entry<?>, EntryMapping> mappings = new HashMap<>();
 		Objects.requireNonNull(recordNames, "Cannot proposeName before indexing");
-
-		if (obfEntry instanceof FieldEntry fieldEntry) {
+		for (FieldEntry fieldEntry : jarIndex.getIndex(EntryIndex.class).getFields()) {
 			if (fieldEntry.getName().startsWith("comp_")) {
-				return Optional.ofNullable(recordNames.get(fieldEntry.getName()));
+				Optional.ofNullable(recordNames.get(fieldEntry.getName())).ifPresent(mapping -> mappings.put(fieldEntry, this.createMapping(mapping, TokenType.JAR_PROPOSED)));
 			}
-
-			return Optional.ofNullable(fieldNames.get(new MappingEntry(fieldEntry.getContainingClass().getFullName(), fieldEntry.getName(), fieldEntry.getDesc().toString())));
-		} else if (obfEntry instanceof MethodEntry methodEntry) {
+			Optional.ofNullable(
+					fieldNames.get(new MappingEntry(fieldEntry.getContainingClass().getFullName(), fieldEntry.getName(), fieldEntry.getDesc().toString()))
+			).ifPresent(mapping ->
+					mappings.put(fieldEntry, new EntryMapping(mapping))
+			);
+		}
+		for (MethodEntry methodEntry : jarIndex.getIndex(EntryIndex.class).getMethods()) {
 			if (methodEntry.getName().startsWith("comp_")) {
-				return Optional.ofNullable(recordNames.get(methodEntry.getName()));
+				Optional.ofNullable(recordNames.get(methodEntry.getName())).ifPresent(mapping -> mappings.put(methodEntry, this.createMapping(mapping, TokenType.JAR_PROPOSED)));
 			}
 		}
+		return mappings;
+	}
 
-		return Optional.empty();
+	@Override
+	public Map<Entry<?>, EntryMapping> getDynamicProposedNames(EntryRemapper entryRemapper, Entry<?> obfEntry, EntryMapping entryMapping, EntryMapping entryMapping1) {
+		return null;
+	}
+
+	@Override
+	public String getId() {
+		return NameProposalServiceEnigmaPlugin.ID_PREFIX + "name_proposal";
 	}
 }
